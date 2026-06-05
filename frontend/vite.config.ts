@@ -9,8 +9,12 @@ function stripTrailingSlash(url: string) {
 export default defineConfig(({ mode }) => {
   const rootDir = path.resolve(__dirname, "..");
   const env = loadEnv(mode, rootDir, "");
-  const backendUrl = stripTrailingSlash(env.BACKEND_URL || "http://127.0.0.1:8000");
-  const useProxy = mode === "development" && !env.FORCE_DIRECT_API;
+  const isVercel = Boolean(env.VERCEL);
+  const backendUrl = isVercel
+    ? ""
+    : stripTrailingSlash(env.BACKEND_URL || "http://127.0.0.1:8000");
+  const useProxy =
+    mode === "development" && !env.FORCE_DIRECT_API && !isVercel;
 
   return {
     plugins: [react()],

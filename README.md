@@ -56,7 +56,43 @@ npm run dev
 
 Open http://localhost:5173 — Vite proxies `/api` to Django using `BACKEND_URL` from `.env`.
 
-## Hosting on a domain
+## Deploy on Vercel
+
+The repo is set up for a **single Vercel project**: the React app is served as static files and `/api/*` routes to the Django API via a Python serverless function.
+
+```
+spotter/
+  api/index.py          # Django WSGI handler for Vercel
+  vercel.json           # build + /api rewrites
+  package.json          # frontend build orchestration
+  requirements.txt      # Python deps for the API function
+  backend/              # Django app (unchanged layout)
+  frontend/             # Vite React app
+```
+
+1. Push the repo to GitHub and import it in [Vercel](https://vercel.com/new).
+2. Leave **Root Directory** empty (repo root). Vercel reads `vercel.json` automatically.
+3. Add environment variables in the Vercel project settings:
+
+| Variable | Value |
+|----------|--------|
+| `SECRET_KEY` | Strong random Django secret |
+| `DEBUG` | `False` |
+| `GEOCODING_USER_AGENT` | Your app name + contact (Nominatim policy) |
+
+You do **not** need `BACKEND_URL` or `FRONTEND_URL` on Vercel — the build uses same-origin `/api` calls and Django allows `.vercel.app` hosts automatically.
+
+Trip planning calls external geocoding APIs and may take 10–30 seconds; `vercel.json` sets `maxDuration: 60` for the API function (requires a Vercel plan that supports longer function timeouts).
+
+```bash
+# Optional: deploy from CLI
+npm i -g vercel
+vercel
+```
+
+Local development is unchanged: run Django in `backend/` and Vite in `frontend/` as described below.
+
+## Hosting on a custom domain
 
 Edit the repo-root `.env` (both apps read the same file):
 
@@ -80,6 +116,8 @@ The built app calls `BACKEND_URL` directly. In local dev, requests stay on `/api
 
 ```
 spotter/
+  api/index.py            # Vercel serverless Django entry
+  vercel.json
   backend/
     trips/hos_engine.py   # HOS simulation & log segments
     trips/geocoding.py    # Nominatim + OSRM

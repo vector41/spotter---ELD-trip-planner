@@ -23,10 +23,22 @@ def _host_from_url(url: str) -> str | None:
     return parsed.hostname
 
 
-BACKEND_URL = _origin(os.getenv("BACKEND_URL", "http://127.0.0.1:8000"))
-FRONTEND_URL = _origin(os.getenv("FRONTEND_URL", "http://localhost:5173"))
+VERCEL_URL = os.getenv("VERCEL_URL", "").strip()
+VERCEL = os.getenv("VERCEL", "").lower() in ("1", "true", "yes")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-in-production")
+_default_backend = (
+    f"https://{VERCEL_URL}" if VERCEL_URL else "http://127.0.0.1:8000"
+)
+_default_frontend = (
+    f"https://{VERCEL_URL}" if VERCEL_URL else "http://localhost:5173"
+)
+
+BACKEND_URL = _origin(os.getenv("BACKEND_URL", _default_backend))
+FRONTEND_URL = _origin(os.getenv("FRONTEND_URL", _default_frontend))
+
+SECRET_KEY = os.getenv("SECRET_KEY") or os.getenv(
+    "DJANGO_SECRET_KEY", "dev-only-change-in-production"
+)
 DEBUG = os.getenv("DEBUG", "True").lower() in ("1", "true", "yes")
 
 _allowed = _csv_env("ALLOWED_HOSTS")
@@ -35,6 +47,10 @@ if not _allowed:
     backend_host = _host_from_url(BACKEND_URL)
     if backend_host and backend_host not in _allowed:
         _allowed.append(backend_host)
+    if VERCEL or VERCEL_URL:
+        for host in (".vercel.app",):
+            if host not in _allowed:
+                _allowed.append(host)
 ALLOWED_HOSTS = _allowed
 
 INSTALLED_APPS = [
