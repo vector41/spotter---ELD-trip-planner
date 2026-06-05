@@ -71,8 +71,8 @@ spotter/
 ```
 
 1. Push the repo to GitHub and import it in [Vercel](https://vercel.com/new).
-2. Leave **Root Directory** empty (repo root). Set **Framework Preset** to **Other** if Vercel auto-detects Vite (Python `api/` functions are only picked up when the preset is not Vite-only).
-3. Vercel reads `vercel.json`, which explicitly builds `frontend/` as static files and `api/index.py` as the Python API.
+2. Leave **Root Directory** empty (repo root). Set **Framework Preset** to **Other** (not Vite) so Vercel serves `frontend/dist` as static files and still picks up `api/index.py` as the Python API.
+3. `vercel.json` builds the frontend into `frontend/dist`, serves that as the site, and rewrites `/api/*` to the Django function.
 4. Add environment variables in the Vercel project settings:
 
 | Variable | Value |
