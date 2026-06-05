@@ -71,8 +71,9 @@ spotter/
 ```
 
 1. Push the repo to GitHub and import it in [Vercel](https://vercel.com/new).
-2. Leave **Root Directory** empty (repo root). Vercel reads `vercel.json` automatically.
-3. Add environment variables in the Vercel project settings:
+2. Leave **Root Directory** empty (repo root). Set **Framework Preset** to **Other** if Vercel auto-detects Vite (Python `api/` functions are only picked up when the preset is not Vite-only).
+3. Vercel reads `vercel.json`, which explicitly builds `frontend/` as static files and `api/index.py` as the Python API.
+4. Add environment variables in the Vercel project settings:
 
 | Variable | Value |
 |----------|--------|
@@ -82,7 +83,7 @@ spotter/
 
 You do **not** need `BACKEND_URL` or `FRONTEND_URL` on Vercel — the build uses same-origin `/api` calls and Django allows `.vercel.app` hosts automatically.
 
-Trip planning calls external geocoding APIs and may take 10–30 seconds; `vercel.json` sets `maxDuration: 60` for the API function (requires a Vercel plan that supports longer function timeouts).
+Trip planning calls external geocoding APIs and may take 10–30 seconds. In the Vercel project dashboard, raise the **Function Max Duration** for the Python API (e.g. 60s on Pro) if requests time out.
 
 ```bash
 # Optional: deploy from CLI
